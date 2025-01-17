@@ -37,13 +37,13 @@ void precalc() {
         if (!arr[i]) tPrimes.insert(i * i);
     }
 }
-int nCr(int n, int r) {
+int nCr(int n, int r, vector<vector<int>> &dp) {
     if (r > n) return 0;
-    if (r == 0 || n == r) return 1;
-    double res = 0;
-    for (int i = 0; i < r; i++) res += log(n - i) - log(i + 1);
-    return (int)round(exp(res));
+    if (r == 0 || r == n) return 1;
+    if(dp[n][r] != -1) return dp[n][r];
+    return dp[n][r] = nCr(n-1, r, dp) + nCr(n-1, r-1, dp);
 }
+
 int power(int x, unsigned int y, int p) {
     int res = 1;
     x = x % p;
@@ -69,22 +69,20 @@ int factorial(int a) {
     for (int i = 2; i <= a; i++) p = p * i;
     return p;
 }
+int solveRec(vi &coins, int x, vi &dp, int n) {
+    if(x == 0) return 1;
+    if(x < 0) return 0;
+    if(dp[x] != -1) return dp[x];
+    int ans = 0;
+    for(int i = 0; i < n; i++) ans += solveRec(coins, x - coins[i], dp, n);
+    return dp[x] = ans % mod;
+}
 void solve() {
-    int n, x;
-    cin >> n >> x;
+    int n, x; cin >> n >> x;
     vi coins(n);
     for(int i = 0; i < n; i++) cin >> coins[i];
-    vi dp(1e6 + 10, 0);
-    dp[0] = 1;
-    for(int i = 0; i <= x + 5; i++) {
-        for(int j = 0; j < n; j++) {
-            if(i - coins[j] >= 0) {
-                dp[i] += dp[i - coins[j]];
-                dp[i] %= mod;
-            }
-        }
-    }
-    cout << dp[x] << endl;
+    vi dp(x + 1, -1);
+    cout << solveRec(coins, x, dp, n) << endl;
 }
 int32_t main() {
     ios_base::sync_with_stdio(false);
