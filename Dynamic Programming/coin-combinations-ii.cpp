@@ -1,18 +1,4 @@
 #include <bits/stdc++.h>
-#define int long long int
-#define vi vector<int>
-#define pii pair<int, int>
-#define vvi vector<vi>
-#define vpi vector<pii>
-#define vb vector<bool>
-#define vs vector<string>
-#define pb push_back
-#define mp make_pair
-#define mii map<int, int>
-#define qpii queue<pair<int, int>>
-#define spii set<pair<int, int>>
-#define all(v) v.begin(), v.end()
-#define rall(v) v.rbegin(), v.rend()
 using namespace std;
 int mod = 1000000007;
 set<int> tPrimes;
@@ -24,7 +10,7 @@ int csum(int a) {
     return (a * (a + 1)) / 2;
 }
 void precalc() {
-    vb arr(1000001, false);
+    vector<bool> arr(1000001, false);
     arr[0] = arr[1] = true;
     for (int i = 2; i * i < 1000001; i++) {
         if (!arr[i]) {
@@ -37,13 +23,13 @@ void precalc() {
         if (!arr[i]) tPrimes.insert(i * i);
     }
 }
-int nCr(int n, int r) {
+int nCr(int n, int r, vector<vector<int>> &dp) {
     if (r > n) return 0;
-    if (r == 0 || n == r) return 1;
-    double res = 0;
-    for (int i = 0; i < r; i++) res += log(n - i) - log(i + 1);
-    return (int)round(exp(res));
+    if (r == 0 || r == n) return 1;
+    if(dp[n][r] != -1) return dp[n][r];
+    return dp[n][r] = nCr(n-1, r, dp) + nCr(n-1, r-1, dp);
 }
+ 
 int power(int x, unsigned int y, int p) {
     int res = 1;
     x = x % p;
@@ -72,20 +58,27 @@ int factorial(int a) {
 void solve() {
     int n, x;
     cin >> n >> x;
-    vi coins(n);
-    for(int i = 0; i < n; i++) cin >> coins[i];
-    vvi dp(n + 1, vi(x + 1, 0));
-    for(int i = 0; i <= n; i++) dp[i][0] = 1;
-    for(int i = 1; i <= n; i++) {
-        for(int j = 0; j <= x; j++) {
-            dp[i][j] = dp[i - 1][j];
-            if(j >= coins[i - 1]) {
-                dp[i][j] += dp[i][j - coins[i - 1]];
-                dp[i][j] %= mod;
-            }
+    vector<int> coins(n);
+    
+    for(int i = 0; i < n; i++) {
+        cin >> coins[i];
+    }
+    
+    sort(coins.rbegin(), coins.rend());
+    
+    vector<int> dp(x+1, 0);
+    
+    dp[0] = 1;
+    
+    for(int coin: coins) {
+        for(int j = coin; j <= x; j++) {
+            dp[j] = (dp[j]+dp[j-coin]) % mod;
         }
     }
-    cout << dp[n][x] << endl;
+    
+    int ans = dp[x];
+    
+    cout << ans << endl;
 }
 int32_t main() {
     ios_base::sync_with_stdio(false);
